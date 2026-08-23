@@ -1,0 +1,57 @@
+name: Android Build
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '11'
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 'stable'
+          cache: true
+      
+      - name: Get dependencies
+        run: flutter pub get
+      
+      - name: Run tests
+        run: flutter test
+      
+      - name: Build Android APK
+        run: flutter build apk --release
+      
+      - name: Build Android App Bundle
+        run: flutter build appbundle --release
+      
+      - name: Upload Android build
+        uses: actions/upload-artifact@v3
+        with:
+          name: android-build
+          path: build/app/outputs/
+      
+      - name: Post build status to PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '✅ Android build completed successfully! APK and App Bundle available in Actions.'
+            })
