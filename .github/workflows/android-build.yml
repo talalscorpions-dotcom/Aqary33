@@ -37,16 +37,28 @@ jobs:
           cache: true
       
       - name: Get dependencies
-        run: flutter pub get
+        run: |
+          PROJECT_DIR=$(find . -name "pubspec.yaml" -type f | head -1 | xargs dirname)
+          cd "$PROJECT_DIR"
+          flutter pub get
       
       - name: Run tests
-        run: flutter test
+        run: |
+          PROJECT_DIR=$(find . -name "pubspec.yaml" -type f | head -1 | xargs dirname)
+          cd "$PROJECT_DIR"
+          flutter test
       
       - name: Build Android APK
-        run: flutter build apk --release
+        run: |
+          PROJECT_DIR=$(find . -name "pubspec.yaml" -type f | head -1 | xargs dirname)
+          cd "$PROJECT_DIR"
+          flutter build apk --release
       
       - name: Build Android App Bundle
-        run: flutter build appbundle --release
+        run: |
+          PROJECT_DIR=$(find . -name "pubspec.yaml" -type f | head -1 | xargs dirname)
+          cd "$PROJECT_DIR"
+          flutter build appbundle --release
       
       - name: Upload Android build
         uses: actions/upload-artifact@v4
