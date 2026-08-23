@@ -39,7 +39,7 @@ jobs:
         run: flutter build appbundle --release
       
       - name: Upload Android build
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: android-build
           path: build/app/outputs/
