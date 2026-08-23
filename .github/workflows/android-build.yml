@@ -14,9 +14,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       
-      - name: Extract and check Flutter Project
+      - name: Check Flutter Project
         run: |
-          unzip -q AQARY_Flutter_Frontend.zip
           echo "=== Current Directory ==="
           pwd
           echo "=== Directory Contents ==="
