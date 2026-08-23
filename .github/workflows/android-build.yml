@@ -35,6 +35,14 @@ jobs:
           flutter-version: '3.24.3'
           cache: true
       
+      - name: Fix Gradle compatibility
+        run: |
+          # Create or update gradle.properties to specify Gradle version
+          mkdir -p ~/.gradle
+          echo "org.gradle.jvmargs=-Xmx2048m" >> ~/.gradle/gradle.properties
+          # Force use of compatible Gradle wrapper
+          flutter config --enable-android
+      
       - name: Get dependencies
         run: |
           PROJECT_DIR=$(find . -name "pubspec.yaml" -type f | head -1 | xargs dirname)
