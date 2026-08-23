@@ -17,6 +17,9 @@ jobs:
       - name: Extract Flutter Project
         run: unzip -q AQARY_Flutter_Frontend.zip
       
+      - name: List extracted files
+        run: ls -la
+      
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
@@ -30,26 +33,22 @@ jobs:
           cache: true
       
       - name: Get dependencies
-        working-directory: ./AQARY_Flutter_Frontend
         run: flutter pub get
       
       - name: Run tests
-        working-directory: ./AQARY_Flutter_Frontend
         run: flutter test
       
       - name: Build Android APK
-        working-directory: ./AQARY_Flutter_Frontend
         run: flutter build apk --release
       
       - name: Build Android App Bundle
-        working-directory: ./AQARY_Flutter_Frontend
         run: flutter build appbundle --release
       
       - name: Upload Android build
         uses: actions/upload-artifact@v4
         with:
           name: android-build
-          path: AQARY_Flutter_Frontend/build/app/outputs/
+          path: build/app/outputs/
       
       - name: Post build status to PR
         if: github.event_name == 'pull_request'
