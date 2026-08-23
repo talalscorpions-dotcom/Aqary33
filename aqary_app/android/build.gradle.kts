@@ -1,8 +1,17 @@
+plugins {
+    id("groovy")
+}
+
 allprojects {
     repositories {
         google()
         mavenCentral()
     }
+}
+
+dependencies {
+    implementation("org.codehaus.groovy:groovy:3.0.21")
+    implementation("org.codehaus.groovy:groovy-xml:3.0.21")
 }
 
 val newBuildDir: Directory =
