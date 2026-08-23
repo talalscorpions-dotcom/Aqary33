@@ -1,0 +1,56 @@
+name: Web Build & Deploy
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Extract Flutter Project
+        run: |
+          unzip -q AQARY_Flutter_Frontend.zip
+          echo "=== Flutter Project extracted ==="
+          find . -name "pubspec.yaml" -type f
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          cache: true
+      
+      - name: Enable Web Support
+        run: flutter config --enable-web
+      
+      - name: Get dependencies
+        run: |
+          PROJECT_DIR=$(find . -name "pubspec.yaml" -type f | head -1 | xargs dirname)
+          cd "$PROJECT_DIR"
+          flutter pub get
+      
+      - name: Build Web
+        run: |
+          PROJECT_DIR=$(find . -name "pubspec.yaml" -type f | head -1 | xargs dirname)
+          cd "$PROJECT_DIR"
+          flutter build web --release
+      
+      - name: Upload Web Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-build
+          path: build/web/
+      
+      - name: Deploy to GitHub Pages
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build/web
+          cname: aqary.example.com
