@@ -47,6 +47,19 @@ jobs:
           EOF
           flutter config --enable-android
       
+      - name: Add Groovy XML dependency fix
+        run: |
+          PROJECT_DIR=$(find . -name "pubspec.yaml" -type f | head -1 | xargs dirname)
+          cd "$PROJECT_DIR/android"
+          
+          # Add groovy-xml to build.gradle if not already present
+          if grep -q "groovy-xml" build.gradle; then
+            echo "groovy-xml dependency already present"
+          else
+            # Add the dependency to buildscript dependencies
+            sed -i '/dependencies {/a\        classpath "org.codehaus.groovy:groovy-xml:3.0.21"' build.gradle
+          fi
+      
       - name: Clean Gradle cache
         run: |
           PROJECT_DIR=$(find . -name "pubspec.yaml" -type f | head -1 | xargs dirname)
