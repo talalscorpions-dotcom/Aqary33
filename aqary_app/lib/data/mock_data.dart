@@ -87,7 +87,7 @@ class MockData {
   ];
 
   // ---------------- Rent: Apartment / Villa (no Land) ----------------
-  static const rentPropertyTypes = <CategoryItem>[
+  static final rentPropertyTypes = <CategoryItem>[
     buyPropertyTypes[0], // Apartment
     buyPropertyTypes[1], // Villa
   ];
