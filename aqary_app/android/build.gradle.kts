@@ -10,8 +10,11 @@ allprojects {
 }
 
 dependencies {
-    implementation("org.codehaus.groovy:groovy:3.0.21")
-    implementation("org.codehaus.groovy:groovy-xml:3.0.21")
+    // Update Groovy to a version that includes groovy-xml and all required modules
+    implementation("org.codehaus.groovy:groovy:4.0.21")
+    implementation("org.codehaus.groovy:groovy-xml:4.0.21")
+    // Ensure XML parsing support is available
+    implementation("org.codehaus.groovy:groovy-all:4.0.21")
 }
 
 val newBuildDir: Directory =
