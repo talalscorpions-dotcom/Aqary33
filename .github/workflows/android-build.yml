@@ -14,11 +14,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       
-      - name: Extract Flutter Project
-        run: unzip -q AQARY_Flutter_Frontend.zip
-      
-      - name: List extracted files
-        run: ls -la
+      - name: Extract and check Flutter Project
+        run: |
+          unzip -q AQARY_Flutter_Frontend.zip
+          echo "=== Current Directory ==="
+          pwd
+          echo "=== Directory Contents ==="
+          ls -la
+          echo "=== Finding pubspec.yaml ==="
+          find . -name "pubspec.yaml" -type f
       
       - name: Setup Java
         uses: actions/setup-java@v3
