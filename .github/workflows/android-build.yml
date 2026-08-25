@@ -14,15 +14,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       
-      - name: Check Flutter Project
-        run: |
-          echo "=== Current Directory ==="
-          pwd
-          echo "=== Directory Contents ==="
-          ls -la
-          echo "=== Finding pubspec.yaml ==="
-          find . -name "pubspec.yaml" -type f
-      
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
@@ -47,60 +38,37 @@ jobs:
           EOF
           flutter config --enable-android
       
-      - name: Fix Groovy XML dependency
+      - name: Get dependencies
         run: |
-          PROJECT_DIR=$(find . -name "pubspec.yaml" -type f | head -1 | xargs dirname)
-          BUILD_GRADLE="$PROJECT_DIR/android/build.gradle"
-          
-          if [ -f "$BUILD_GRADLE" ]; then
-            # Check if groovy-xml is already present
-            if ! grep -q "groovy-xml" "$BUILD_GRADLE"; then
-              # Add groovy-xml to the dependencies block
-              perl -i -pe 's/(dependencies\s*\{)/$1\n        classpath "org.codehaus.groovy:groovy-xml:3.0.21"/' "$BUILD_GRADLE"
-              echo "Added groovy-xml dependency"
-            else
-              echo "groovy-xml dependency already present"
-            fi
-          else
-            echo "build.gradle not found at $BUILD_GRADLE"
-          fi
+          cd ./aqary_app
+          flutter pub get
       
-      - name: Clean Gradle cache
+      - name: Clean build
         run: |
-          PROJECT_DIR=$(find . -name "pubspec.yaml" -type f | head -1 | xargs dirname)
-          cd "$PROJECT_DIR"
+          cd ./aqary_app
           flutter clean
           ./android/gradlew clean -p android/ || true
       
-      - name: Get dependencies
-        run: |
-          PROJECT_DIR=$(find . -name "pubspec.yaml" -type f | head -1 | xargs dirname)
-          cd "$PROJECT_DIR"
-          flutter pub get
-      
       - name: Run tests
         run: |
-          PROJECT_DIR=$(find . -name "pubspec.yaml" -type f | head -1 | xargs dirname)
-          cd "$PROJECT_DIR"
+          cd ./aqary_app
           flutter test
       
       - name: Build Android APK
         run: |
-          PROJECT_DIR=$(find . -name "pubspec.yaml" -type f | head -1 | xargs dirname)
-          cd "$PROJECT_DIR"
+          cd ./aqary_app
           flutter build apk --release
       
       - name: Build Android App Bundle
         run: |
-          PROJECT_DIR=$(find . -name "pubspec.yaml" -type f | head -1 | xargs dirname)
-          cd "$PROJECT_DIR"
+          cd ./aqary_app
           flutter build appbundle --release
       
       - name: Upload Android build
         uses: actions/upload-artifact@v4
         with:
           name: android-build
-          path: build/app/outputs/
+          path: aqary_app/build/app/outputs/
       
       - name: Post build status to PR
         if: github.event_name == 'pull_request'
