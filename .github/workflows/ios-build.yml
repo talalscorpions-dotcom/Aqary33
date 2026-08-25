@@ -29,11 +29,11 @@ jobs:
         working-directory: ./aqary_app
       
       - name: Build iOS app
-        run: flutter build ios --release --no-codesign
+        run: flutter build ios --release --no-codesign --simulator
         working-directory: ./aqary_app
       
       - name: Upload iOS build
         uses: actions/upload-artifact@v4
         with:
           name: ios-build
-          path: aqary_app/build/ios/iphoneos/Runner.app
+          path: aqary_app/build/ios/iphonesimulator/Runner.app
