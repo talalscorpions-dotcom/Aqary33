@@ -35,10 +35,10 @@ extension SellerCategoryX on SellerCategory {
 }
 
 /// Step 2 of sign-up. A Purchase account asks for phone, email, and
-/// password. A Sell account asks for the same fields, plus which
-/// [SellerCategory] it is — which decides whether it verifies with an
+/// password. A Sell account picks its [SellerCategory] first — before
+/// any contact fields — since that decides whether it verifies with an
 /// Agent Licence + Photo ID or a Commercial Registration + Municipality
-/// Approval — then routes to verification instead of activating
+/// Approval, then routes to verification instead of activating
 /// immediately, matching Section 3.1 of the Statement of Work.
 class SignUpFormScreen extends StatefulWidget {
   final AccountRole role;
@@ -84,6 +84,24 @@ class _SignUpFormScreenState extends State<SignUpFormScreen> {
                     : 'Purchase account'
               ]),
               const SizedBox(height: 4),
+              if (_isSeller) ...[
+                Text('SELLER CATEGORY', style: AppTextStyles.kicker),
+                const SizedBox(height: 10),
+                DropdownButtonFormField<SellerCategory>(
+                  value: _sellerCategory,
+                  onChanged: (v) => setState(() => _sellerCategory = v),
+                  validator: (v) => v == null
+                      ? 'Select what kind of seller account this is'
+                      : null,
+                  decoration: const InputDecoration(
+                      hintText: 'What are you selling on AQARY?'),
+                  items: SellerCategory.values
+                      .map((c) =>
+                          DropdownMenuItem(value: c, child: Text(c.label)))
+                      .toList(),
+                ),
+                const SizedBox(height: 20),
+              ],
               _Field(
                   label: 'Phone Number',
                   hint: '+968 9xxx xxxx',
@@ -106,22 +124,6 @@ class _SignUpFormScreenState extends State<SignUpFormScreen> {
                   obscure: true),
               if (_isSeller) ...[
                 const SizedBox(height: 8),
-                Text('SELLER CATEGORY', style: AppTextStyles.kicker),
-                const SizedBox(height: 10),
-                DropdownButtonFormField<SellerCategory>(
-                  value: _sellerCategory,
-                  onChanged: (v) => setState(() => _sellerCategory = v),
-                  validator: (v) => v == null
-                      ? 'Select what kind of seller account this is'
-                      : null,
-                  decoration: const InputDecoration(
-                      hintText: 'What are you selling on AQARY?'),
-                  items: SellerCategory.values
-                      .map((c) =>
-                          DropdownMenuItem(value: c, child: Text(c.label)))
-                      .toList(),
-                ),
-                const SizedBox(height: 18),
                 Text('VERIFICATION — REQUIRED FOR SELLERS',
                     style: AppTextStyles.kicker),
                 const SizedBox(height: 10),
