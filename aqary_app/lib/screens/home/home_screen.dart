@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
-import '../admin/pending_approvals_screen.dart';
+import '../admin/admin_login_screen.dart';
 import '../properties/properties_flow.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -20,31 +20,43 @@ class HomeScreen extends StatelessWidget {
                   height: 34,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
-                    gradient: const LinearGradient(colors: [Color(0xFF17706C), AppColors.tealDark]),
+                    gradient: const LinearGradient(
+                        colors: [Color(0xFF17706C), AppColors.tealDark]),
                   ),
-                  child: const Icon(Icons.account_balance_rounded, color: Colors.white, size: 18),
+                  child: const Icon(Icons.account_balance_rounded,
+                      color: Colors.white, size: 18),
                 ),
                 const SizedBox(width: 10),
-                Text('AQARY', style: AppTextStyles.heading.copyWith(fontSize: 20)),
+                Text('AQARY',
+                    style: AppTextStyles.heading.copyWith(fontSize: 20)),
               ],
             ),
             const SizedBox(height: 20),
             Row(
               children: [
                 Expanded(
-                  child: Text('Good morning, Talal', style: AppTextStyles.heading.copyWith(fontSize: 21)),
+                  child: Text('Good morning, Talal',
+                      style: AppTextStyles.heading.copyWith(fontSize: 21)),
                 ),
-                const CircleAvatar(radius: 18, backgroundColor: AppColors.terra, child: Text('T', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800))),
+                const CircleAvatar(
+                    radius: 18,
+                    backgroundColor: AppColors.terra,
+                    child: Text('T',
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.w800))),
               ],
             ),
-            const Text('Muscat, Al Khuwair', style: TextStyle(fontSize: 12, color: AppColors.mute)),
+            const Text('Muscat, Al Khuwair',
+                style: TextStyle(fontSize: 12, color: AppColors.mute)),
             const SizedBox(height: 16),
             TextField(
               decoration: InputDecoration(
                 hintText: 'Search land, villas, contractors...',
                 prefixIcon: const Icon(Icons.search_rounded, size: 20),
                 fillColor: AppColors.card,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide.none),
               ),
             ),
             const SizedBox(height: 22),
@@ -62,13 +74,17 @@ class HomeScreen extends StatelessWidget {
                   icon: Icons.home_rounded,
                   label: 'Properties',
                   gradient: const [Color(0xFF17706C), AppColors.tealDark],
-                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => buildPropertiesTopScreen(context))),
+                  onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => buildPropertiesTopScreen(context))),
                 ),
                 _ModuleTile(
                   icon: Icons.apartment_rounded,
                   label: 'Development & Building',
                   gradient: const [Color(0xFFDE9865), Color(0xFFB5673A)],
-                  onTap: () => _comingSoonToast(context, 'Development & Building'),
+                  onTap: () =>
+                      _comingSoonToast(context, 'Development & Building'),
                 ),
                 _ModuleTile(
                   icon: Icons.storefront_rounded,
@@ -90,9 +106,12 @@ class HomeScreen extends StatelessWidget {
                 ),
                 _ModuleTile(
                   icon: Icons.verified_user_rounded,
-                  label: 'Trust & Verification',
+                  label: 'Admin Panel',
                   gradient: const [Color(0xFF3E8C82), AppColors.teal],
-                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PendingApprovalsScreen())),
+                  onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const AdminLoginScreen())),
                 ),
               ],
             ),
@@ -107,9 +126,21 @@ class HomeScreen extends StatelessWidget {
               mainAxisSpacing: 10,
               childAspectRatio: 1.25,
               children: const [
-                _ModuleTile(icon: Icons.sync_alt_rounded, label: 'Loan', gradient: [Color(0xFF9E9E9B), Color(0xFF6B6B68)], soon: true),
-                _ModuleTile(icon: Icons.account_balance_rounded, label: 'E-Gov', gradient: [Color(0xFF9E9E9B), Color(0xFF6B6B68)], soon: true),
-                _ModuleTile(icon: Icons.smart_toy_rounded, label: 'AI Assistant', gradient: [Color(0xFF9E9E9B), Color(0xFF6B6B68)], soon: true),
+                _ModuleTile(
+                    icon: Icons.sync_alt_rounded,
+                    label: 'Loan',
+                    gradient: [Color(0xFF9E9E9B), Color(0xFF6B6B68)],
+                    soon: true),
+                _ModuleTile(
+                    icon: Icons.account_balance_rounded,
+                    label: 'E-Gov',
+                    gradient: [Color(0xFF9E9E9B), Color(0xFF6B6B68)],
+                    soon: true),
+                _ModuleTile(
+                    icon: Icons.smart_toy_rounded,
+                    label: 'AI Assistant',
+                    gradient: [Color(0xFF9E9E9B), Color(0xFF6B6B68)],
+                    soon: true),
               ],
             ),
           ],
@@ -119,10 +150,14 @@ class HomeScreen extends StatelessWidget {
         selectedIndex: 0,
         destinations: const [
           NavigationDestination(icon: Icon(Icons.home_rounded), label: 'Home'),
-          NavigationDestination(icon: Icon(Icons.explore_outlined), label: 'Explore'),
-          NavigationDestination(icon: Icon(Icons.folder_outlined), label: 'My Build'),
-          NavigationDestination(icon: Icon(Icons.chat_bubble_outline_rounded), label: 'Inbox'),
-          NavigationDestination(icon: Icon(Icons.person_outline_rounded), label: 'Profile'),
+          NavigationDestination(
+              icon: Icon(Icons.explore_outlined), label: 'Explore'),
+          NavigationDestination(
+              icon: Icon(Icons.folder_outlined), label: 'My Build'),
+          NavigationDestination(
+              icon: Icon(Icons.chat_bubble_outline_rounded), label: 'Inbox'),
+          NavigationDestination(
+              icon: Icon(Icons.person_outline_rounded), label: 'Profile'),
         ],
       ),
     );
@@ -130,7 +165,9 @@ class HomeScreen extends StatelessWidget {
 
   static void _comingSoonToast(BuildContext context, String module) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$module — build this screen next, following the Properties pattern.')),
+      SnackBar(
+          content: Text(
+              '$module — build this screen next, following the Properties pattern.')),
     );
   }
 }
@@ -144,9 +181,17 @@ class _SectionDot extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Container(width: 7, height: 7, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+        Container(
+            width: 7,
+            height: 7,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
         const SizedBox(width: 8),
-        Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: color == AppColors.mute ? AppColors.mute : AppColors.ink, letterSpacing: 0.4)),
+        Text(label,
+            style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                color: color == AppColors.mute ? AppColors.mute : AppColors.ink,
+                letterSpacing: 0.4)),
       ],
     );
   }
@@ -187,7 +232,10 @@ class _ModuleTile extends StatelessWidget {
                   height: 42,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(13),
-                    gradient: LinearGradient(colors: gradient, begin: Alignment.topLeft, end: Alignment.bottomRight),
+                    gradient: LinearGradient(
+                        colors: gradient,
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight),
                   ),
                   child: Icon(icon, color: Colors.white, size: 20),
                 ),
@@ -197,14 +245,24 @@ class _ModuleTile extends StatelessWidget {
                 label,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: soon ? AppColors.mute : AppColors.ink),
+                style: TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w700,
+                    color: soon ? AppColors.mute : AppColors.ink),
               ),
               if (soon) ...[
                 const SizedBox(height: 4),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                  decoration: BoxDecoration(color: AppColors.tealDark, borderRadius: BorderRadius.circular(20)),
-                  child: const Text('SOON', style: TextStyle(fontSize: 8, color: Colors.white, fontWeight: FontWeight.w800)),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                  decoration: BoxDecoration(
+                      color: AppColors.tealDark,
+                      borderRadius: BorderRadius.circular(20)),
+                  child: const Text('SOON',
+                      style: TextStyle(
+                          fontSize: 8,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800)),
                 ),
               ],
             ],

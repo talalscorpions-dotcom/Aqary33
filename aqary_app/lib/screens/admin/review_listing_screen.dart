@@ -16,7 +16,8 @@ class ReviewListingScreen extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(18, 6, 18, 24),
           children: [
-            const Text('Submitted 2 hours ago · Talal Al Balushi', style: TextStyle(fontSize: 12, color: AppColors.mute)),
+            const Text('Submitted 2 hours ago · Talal Al Balushi',
+                style: TextStyle(fontSize: 12, color: AppColors.mute)),
             const SizedBox(height: 16),
             _ListingPreview(),
             const SizedBox(height: 20),
@@ -24,26 +25,37 @@ class ReviewListingScreen extends StatelessWidget {
             const SizedBox(height: 10),
             Row(
               children: const [
-                Expanded(child: _DocThumb(icon: Icons.description_rounded, label: 'Title Deed')),
+                Expanded(
+                    child: _DocThumb(
+                        icon: Icons.description_rounded, label: 'Title Deed')),
                 SizedBox(width: 9),
-                Expanded(child: _DocThumb(icon: Icons.photo_library_rounded, label: 'Photos (5)')),
+                Expanded(
+                    child: _DocThumb(
+                        icon: Icons.photo_library_rounded,
+                        label: 'Photos (5)')),
                 SizedBox(width: 9),
-                Expanded(child: _DocThumb(icon: Icons.badge_rounded, label: 'Owner ID')),
+                Expanded(
+                    child: _DocThumb(
+                        icon: Icons.badge_rounded, label: 'Owner ID')),
               ],
             ),
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(color: AppColors.tealTint, borderRadius: BorderRadius.circular(14)),
+              decoration: BoxDecoration(
+                  color: AppColors.tealTint,
+                  borderRadius: BorderRadius.circular(14)),
               child: const Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.verified_rounded, size: 16, color: AppColors.tealDark),
+                  Icon(Icons.verified_rounded,
+                      size: 16, color: AppColors.tealDark),
                   SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       'Title deed name matches the submitting account. No duplicate listing found for this plot number.',
-                      style: TextStyle(fontSize: 12, color: AppColors.tealDark, height: 1.4),
+                      style: TextStyle(
+                          fontSize: 12, color: AppColors.tealDark, height: 1.4),
                     ),
                   ),
                 ],
@@ -55,9 +67,12 @@ class ReviewListingScreen extends StatelessWidget {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () => _decide(context, approved: false),
-                    icon: const Icon(Icons.cancel_rounded, size: 17, color: AppColors.danger),
-                    label: const Text('Reject', style: TextStyle(color: AppColors.danger)),
-                    style: OutlinedButton.styleFrom(side: const BorderSide(color: Color(0xFFEAC2C2))),
+                    icon: const Icon(Icons.cancel_rounded,
+                        size: 17, color: AppColors.danger),
+                    label: const Text('Reject',
+                        style: TextStyle(color: AppColors.danger)),
+                    style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Color(0xFFEAC2C2))),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -66,7 +81,8 @@ class ReviewListingScreen extends StatelessWidget {
                     onPressed: () => _decide(context, approved: true),
                     icon: const Icon(Icons.check_circle_rounded, size: 17),
                     label: const Text('Approve'),
-                    style: ElevatedButton.styleFrom(backgroundColor: AppColors.teal),
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.teal),
                   ),
                 ),
               ],
@@ -80,7 +96,8 @@ class ReviewListingScreen extends StatelessWidget {
   void _decide(BuildContext context, {required bool approved}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(approved ? 'Listing approved and published.' : 'Listing rejected.'),
+        content: Text(
+            approved ? 'Listing approved and published.' : 'Listing rejected.'),
         backgroundColor: approved ? AppColors.tealDark : AppColors.danger,
       ),
     );
@@ -104,20 +121,28 @@ class _ListingPreview extends StatelessWidget {
           Container(
             height: 130,
             decoration: const BoxDecoration(
-              gradient: LinearGradient(colors: [AppColors.teal, AppColors.terra]),
+              gradient:
+                  LinearGradient(colors: [AppColors.teal, AppColors.terra]),
             ),
             padding: const EdgeInsets.all(10),
             child: Align(
               alignment: Alignment.topLeft,
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-                decoration: BoxDecoration(color: Colors.white.withOpacity(0.92), borderRadius: BorderRadius.circular(20)),
+                decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.92),
+                    borderRadius: BorderRadius.circular(20)),
                 child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.hourglass_bottom_rounded, size: 12, color: AppColors.terra),
+                    Icon(Icons.hourglass_bottom_rounded,
+                        size: 12, color: AppColors.terra),
                     SizedBox(width: 4),
-                    Text('Pending', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: AppColors.terra)),
+                    Text('Pending',
+                        style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.terra)),
                   ],
                 ),
               ),
@@ -128,9 +153,14 @@ class _ListingPreview extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('OMR 185,000', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.tealDark)),
+                const Text('OMR 185,000',
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.tealDark)),
                 const SizedBox(height: 4),
-                const Text('4BR Villa — Madinat Al Ilam, Muscat', style: TextStyle(fontSize: 12.5, color: AppColors.mute)),
+                const Text('4BR Villa — Madinat Al Ilam, Muscat',
+                    style: TextStyle(fontSize: 12.5, color: AppColors.mute)),
                 const SizedBox(height: 10),
                 Wrap(
                   spacing: 14,
@@ -161,7 +191,8 @@ class _MetaText extends StatelessWidget {
       children: [
         Icon(icon, size: 13, color: AppColors.mute),
         const SizedBox(width: 4),
-        Text(label, style: const TextStyle(fontSize: 11.5, color: AppColors.mute)),
+        Text(label,
+            style: const TextStyle(fontSize: 11.5, color: AppColors.mute)),
       ],
     );
   }
@@ -186,7 +217,11 @@ class _DocThumb extends StatelessWidget {
         children: [
           Icon(icon, size: 20, color: AppColors.mute),
           const SizedBox(height: 6),
-          Text(label, style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w700, color: AppColors.mute)),
+          Text(label,
+              style: const TextStyle(
+                  fontSize: 9.5,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.mute)),
         ],
       ),
     );
