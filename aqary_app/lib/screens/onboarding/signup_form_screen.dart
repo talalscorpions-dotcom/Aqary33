@@ -34,6 +34,43 @@ extension SellerCategoryX on SellerCategory {
   bool get requiresAgentDocs => this == SellerCategory.realEstateAgent;
 }
 
+/// What a Marketplace / Retail Vendor sells. Only asked when
+/// [SellerCategory.marketplaceRetail] is picked, so AQARY can route their
+/// listings under the right retail department.
+enum MarketplaceCategory {
+  furniture,
+  flooring,
+  concrete,
+  bath,
+  gardening,
+  pool,
+  lighting,
+  other
+}
+
+extension MarketplaceCategoryX on MarketplaceCategory {
+  String get label {
+    switch (this) {
+      case MarketplaceCategory.furniture:
+        return 'Furniture';
+      case MarketplaceCategory.flooring:
+        return 'Flooring';
+      case MarketplaceCategory.concrete:
+        return 'Concrete';
+      case MarketplaceCategory.bath:
+        return 'Bath';
+      case MarketplaceCategory.gardening:
+        return 'Gardening';
+      case MarketplaceCategory.pool:
+        return 'Pool';
+      case MarketplaceCategory.lighting:
+        return 'Lighting';
+      case MarketplaceCategory.other:
+        return 'Other';
+    }
+  }
+}
+
 /// Step 2 of sign-up. A Purchase account asks for phone, email, and
 /// password. A Sell account picks its [SellerCategory] first — before
 /// any contact fields — since that decides whether it verifies with an
@@ -55,6 +92,7 @@ class _SignUpFormScreenState extends State<SignUpFormScreen> {
   final _password = TextEditingController();
   final _confirm = TextEditingController();
   SellerCategory? _sellerCategory;
+  MarketplaceCategory? _marketplaceCategory;
 
   bool get _isSeller => widget.role == AccountRole.sell;
 
@@ -89,7 +127,12 @@ class _SignUpFormScreenState extends State<SignUpFormScreen> {
                 const SizedBox(height: 10),
                 DropdownButtonFormField<SellerCategory>(
                   value: _sellerCategory,
-                  onChanged: (v) => setState(() => _sellerCategory = v),
+                  onChanged: (v) => setState(() {
+                    _sellerCategory = v;
+                    // A sub-category from a previous marketplace pick no
+                    // longer applies once the seller category changes.
+                    _marketplaceCategory = null;
+                  }),
                   validator: (v) => v == null
                       ? 'Select what kind of seller account this is'
                       : null,
@@ -100,6 +143,24 @@ class _SignUpFormScreenState extends State<SignUpFormScreen> {
                           DropdownMenuItem(value: c, child: Text(c.label)))
                       .toList(),
                 ),
+                if (_sellerCategory == SellerCategory.marketplaceRetail) ...[
+                  const SizedBox(height: 16),
+                  Text('MARKETPLACE CATEGORY', style: AppTextStyles.kicker),
+                  const SizedBox(height: 10),
+                  DropdownButtonFormField<MarketplaceCategory>(
+                    value: _marketplaceCategory,
+                    onChanged: (v) => setState(() => _marketplaceCategory = v),
+                    validator: (v) => v == null
+                        ? 'Select what you sell on the marketplace'
+                        : null,
+                    decoration:
+                        const InputDecoration(hintText: 'What do you sell?'),
+                    items: MarketplaceCategory.values
+                        .map((c) =>
+                            DropdownMenuItem(value: c, child: Text(c.label)))
+                        .toList(),
+                  ),
+                ],
                 const SizedBox(height: 20),
               ],
               _Field(
