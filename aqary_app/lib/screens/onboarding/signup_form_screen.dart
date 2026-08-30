@@ -71,6 +71,61 @@ extension MarketplaceCategoryX on MarketplaceCategory {
   }
 }
 
+/// What trade a Maintenance Provider works in. Only asked when
+/// [SellerCategory.maintenance] is picked.
+enum MaintenanceCategory {
+  plumbing,
+  ac,
+  gas,
+  kitchen,
+  electrical,
+  painting,
+  cleaning,
+  other
+}
+
+extension MaintenanceCategoryX on MaintenanceCategory {
+  String get label {
+    switch (this) {
+      case MaintenanceCategory.plumbing:
+        return 'Plumbing';
+      case MaintenanceCategory.ac:
+        return 'AC & Cooling';
+      case MaintenanceCategory.gas:
+        return 'Gas';
+      case MaintenanceCategory.kitchen:
+        return 'Kitchen';
+      case MaintenanceCategory.electrical:
+        return 'Electrical';
+      case MaintenanceCategory.painting:
+        return 'Painting';
+      case MaintenanceCategory.cleaning:
+        return 'Cleaning';
+      case MaintenanceCategory.other:
+        return 'Other';
+    }
+  }
+}
+
+/// What kind of development business this is. Only asked when
+/// [SellerCategory.development] is picked.
+enum DevelopmentCategory { developmentCompany, contractor, architecture, other }
+
+extension DevelopmentCategoryX on DevelopmentCategory {
+  String get label {
+    switch (this) {
+      case DevelopmentCategory.developmentCompany:
+        return 'Development Company';
+      case DevelopmentCategory.contractor:
+        return 'Contractor';
+      case DevelopmentCategory.architecture:
+        return 'Architecture';
+      case DevelopmentCategory.other:
+        return 'Other';
+    }
+  }
+}
+
 /// Step 2 of sign-up. A Purchase account asks for phone, email, and
 /// password. A Sell account picks its [SellerCategory] first — before
 /// any contact fields — since that decides whether it verifies with an
@@ -93,6 +148,8 @@ class _SignUpFormScreenState extends State<SignUpFormScreen> {
   final _confirm = TextEditingController();
   SellerCategory? _sellerCategory;
   MarketplaceCategory? _marketplaceCategory;
+  MaintenanceCategory? _maintenanceCategory;
+  DevelopmentCategory? _developmentCategory;
 
   bool get _isSeller => widget.role == AccountRole.sell;
 
@@ -129,9 +186,11 @@ class _SignUpFormScreenState extends State<SignUpFormScreen> {
                   value: _sellerCategory,
                   onChanged: (v) => setState(() {
                     _sellerCategory = v;
-                    // A sub-category from a previous marketplace pick no
-                    // longer applies once the seller category changes.
+                    // A sub-category from a previous pick no longer applies
+                    // once the seller category changes.
                     _marketplaceCategory = null;
+                    _maintenanceCategory = null;
+                    _developmentCategory = null;
                   }),
                   validator: (v) => v == null
                       ? 'Select what kind of seller account this is'
@@ -143,24 +202,33 @@ class _SignUpFormScreenState extends State<SignUpFormScreen> {
                           DropdownMenuItem(value: c, child: Text(c.label)))
                       .toList(),
                 ),
-                if (_sellerCategory == SellerCategory.marketplaceRetail) ...[
-                  const SizedBox(height: 16),
-                  Text('MARKETPLACE CATEGORY', style: AppTextStyles.kicker),
-                  const SizedBox(height: 10),
-                  DropdownButtonFormField<MarketplaceCategory>(
+                if (_sellerCategory == SellerCategory.marketplaceRetail)
+                  ..._subCategoryDropdown<MarketplaceCategory>(
+                    label: 'MARKETPLACE CATEGORY',
+                    hint: 'What do you sell?',
                     value: _marketplaceCategory,
+                    items: MarketplaceCategory.values,
+                    itemLabel: (c) => c.label,
                     onChanged: (v) => setState(() => _marketplaceCategory = v),
-                    validator: (v) => v == null
-                        ? 'Select what you sell on the marketplace'
-                        : null,
-                    decoration:
-                        const InputDecoration(hintText: 'What do you sell?'),
-                    items: MarketplaceCategory.values
-                        .map((c) =>
-                            DropdownMenuItem(value: c, child: Text(c.label)))
-                        .toList(),
                   ),
-                ],
+                if (_sellerCategory == SellerCategory.maintenance)
+                  ..._subCategoryDropdown<MaintenanceCategory>(
+                    label: 'MAINTENANCE CATEGORY',
+                    hint: 'What service do you provide?',
+                    value: _maintenanceCategory,
+                    items: MaintenanceCategory.values,
+                    itemLabel: (c) => c.label,
+                    onChanged: (v) => setState(() => _maintenanceCategory = v),
+                  ),
+                if (_sellerCategory == SellerCategory.development)
+                  ..._subCategoryDropdown<DevelopmentCategory>(
+                    label: 'DEVELOPMENT CATEGORY',
+                    hint: 'What type of development business is this?',
+                    value: _developmentCategory,
+                    items: DevelopmentCategory.values,
+                    itemLabel: (c) => c.label,
+                    onChanged: (v) => setState(() => _developmentCategory = v),
+                  ),
                 const SizedBox(height: 20),
               ],
               _Field(
@@ -249,6 +317,33 @@ class _SignUpFormScreenState extends State<SignUpFormScreen> {
         ),
       ),
     );
+  }
+
+  /// A labelled dropdown for a seller sub-category (marketplace/maintenance/
+  /// development), shared so each one stays a single required field with
+  /// consistent spacing and a "select something" validator.
+  List<Widget> _subCategoryDropdown<T>({
+    required String label,
+    required String hint,
+    required T? value,
+    required List<T> items,
+    required String Function(T) itemLabel,
+    required ValueChanged<T?> onChanged,
+  }) {
+    return [
+      const SizedBox(height: 16),
+      Text(label, style: AppTextStyles.kicker),
+      const SizedBox(height: 10),
+      DropdownButtonFormField<T>(
+        value: value,
+        onChanged: onChanged,
+        validator: (v) => v == null ? 'Required' : null,
+        decoration: InputDecoration(hintText: hint),
+        items: items
+            .map((c) => DropdownMenuItem(value: c, child: Text(itemLabel(c))))
+            .toList(),
+      ),
+    ];
   }
 
   void _submit() {
