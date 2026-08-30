@@ -5,10 +5,41 @@ import '../home/home_screen.dart';
 import 'login_screen.dart';
 import 'role_choice_screen.dart';
 
+/// What kind of seller account this is. Each maps to a different set of
+/// required verification documents — see [SellerCategoryX.requiresAgentDocs].
+enum SellerCategory {
+  realEstateAgent,
+  marketplaceRetail,
+  maintenance,
+  development
+}
+
+extension SellerCategoryX on SellerCategory {
+  String get label {
+    switch (this) {
+      case SellerCategory.realEstateAgent:
+        return 'Real Estate Agent';
+      case SellerCategory.marketplaceRetail:
+        return 'Marketplace — Retail Vendor';
+      case SellerCategory.maintenance:
+        return 'Maintenance Provider';
+      case SellerCategory.development:
+        return 'Development';
+    }
+  }
+
+  /// Individual agents verify with a licence + personal ID. Every other
+  /// seller category is a registered business, so it verifies with its
+  /// Commercial Registration and Municipality Approval instead.
+  bool get requiresAgentDocs => this == SellerCategory.realEstateAgent;
+}
+
 /// Step 2 of sign-up. A Purchase account asks for phone, email, and
-/// password. A Sell account asks for the same fields plus an Agent
-/// Licence and Photo ID upload, then routes to verification instead of
-/// activating immediately — matching Section 3.1 of the Statement of Work.
+/// password. A Sell account asks for the same fields, plus which
+/// [SellerCategory] it is — which decides whether it verifies with an
+/// Agent Licence + Photo ID or a Commercial Registration + Municipality
+/// Approval — then routes to verification instead of activating
+/// immediately, matching Section 3.1 of the Statement of Work.
 class SignUpFormScreen extends StatefulWidget {
   final AccountRole role;
   const SignUpFormScreen({super.key, required this.role});
@@ -23,6 +54,7 @@ class _SignUpFormScreenState extends State<SignUpFormScreen> {
   final _email = TextEditingController();
   final _password = TextEditingController();
   final _confirm = TextEditingController();
+  SellerCategory? _sellerCategory;
 
   bool get _isSeller => widget.role == AccountRole.sell;
 
@@ -45,36 +77,105 @@ class _SignUpFormScreenState extends State<SignUpFormScreen> {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(18, 6, 18, 24),
             children: [
-              Breadcrumb(path: ['Step 2 of 2', _isSeller ? 'Seller / agent account' : 'Purchase account']),
+              Breadcrumb(path: [
+                'Step 2 of 2',
+                _isSeller
+                    ? (_sellerCategory?.label ?? 'Seller account')
+                    : 'Purchase account'
+              ]),
               const SizedBox(height: 4),
-              _Field(label: 'Phone Number', hint: '+968 9xxx xxxx', controller: _phone, keyboardType: TextInputType.phone),
-              _Field(label: 'Username (Email Address)', hint: 'you@example.com', controller: _email, keyboardType: TextInputType.emailAddress),
-              _Field(label: 'Password', hint: '••••••••', controller: _password, obscure: true),
-              _Field(label: 'Re-enter Password', hint: '••••••••', controller: _confirm, obscure: true),
+              _Field(
+                  label: 'Phone Number',
+                  hint: '+968 9xxx xxxx',
+                  controller: _phone,
+                  keyboardType: TextInputType.phone),
+              _Field(
+                  label: 'Username (Email Address)',
+                  hint: 'you@example.com',
+                  controller: _email,
+                  keyboardType: TextInputType.emailAddress),
+              _Field(
+                  label: 'Password',
+                  hint: '••••••••',
+                  controller: _password,
+                  obscure: true),
+              _Field(
+                  label: 'Re-enter Password',
+                  hint: '••••••••',
+                  controller: _confirm,
+                  obscure: true),
               if (_isSeller) ...[
                 const SizedBox(height: 8),
-                Text('VERIFICATION — REQUIRED FOR SELLERS', style: AppTextStyles.kicker),
+                Text('SELLER CATEGORY', style: AppTextStyles.kicker),
                 const SizedBox(height: 10),
-                const _UploadBox(icon: Icons.badge_rounded, label: 'Upload Agent Licence — required if listing on behalf of others'),
+                DropdownButtonFormField<SellerCategory>(
+                  value: _sellerCategory,
+                  onChanged: (v) => setState(() => _sellerCategory = v),
+                  validator: (v) => v == null
+                      ? 'Select what kind of seller account this is'
+                      : null,
+                  decoration: const InputDecoration(
+                      hintText: 'What are you selling on AQARY?'),
+                  items: SellerCategory.values
+                      .map((c) =>
+                          DropdownMenuItem(value: c, child: Text(c.label)))
+                      .toList(),
+                ),
+                const SizedBox(height: 18),
+                Text('VERIFICATION — REQUIRED FOR SELLERS',
+                    style: AppTextStyles.kicker),
                 const SizedBox(height: 10),
-                const _UploadBox(icon: Icons.camera_alt_rounded, label: 'Upload a Photo ID (Civil ID or Passport)'),
+                if (_sellerCategory == null)
+                  const Text(
+                    'Pick a category above to see the documents you need to upload.',
+                    style: TextStyle(
+                        fontSize: 11.5, color: AppColors.mute, height: 1.4),
+                  )
+                else if (_sellerCategory!.requiresAgentDocs) ...[
+                  const _UploadBox(
+                      icon: Icons.badge_rounded,
+                      label:
+                          'Upload Agent Licence — required if listing on behalf of others'),
+                  const SizedBox(height: 10),
+                  const _UploadBox(
+                      icon: Icons.camera_alt_rounded,
+                      label: 'Upload a Photo ID (Civil ID or Passport)'),
+                ] else ...[
+                  const _UploadBox(
+                      icon: Icons.receipt_long_rounded,
+                      label:
+                          'Upload your Commercial Registration (CR) certificate'),
+                  const SizedBox(height: 10),
+                  const _UploadBox(
+                      icon: Icons.verified_rounded,
+                      label: 'Upload your Municipality Approval'),
+                ],
               ],
               const SizedBox(height: 22),
               ElevatedButton(
                 onPressed: _submit,
-                child: Text(_isSeller ? 'Submit for Verification  →' : 'Create Account  →'),
+                child: Text(_isSeller
+                    ? 'Submit for Verification  →'
+                    : 'Create Account  →'),
               ),
               const SizedBox(height: 14),
               Center(
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text('Already have an account? ', style: TextStyle(fontSize: 12, color: AppColors.mute)),
+                    const Text('Already have an account? ',
+                        style: TextStyle(fontSize: 12, color: AppColors.mute)),
                     GestureDetector(
-                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen())),
+                      onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const LoginScreen())),
                       child: const Text(
                         'Log In',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.tealDark),
+                        style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.tealDark),
                       ),
                     ),
                   ],
@@ -130,13 +231,19 @@ class _Field extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label.toUpperCase(), style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: AppColors.mute, letterSpacing: 0.3)),
+          Text(label.toUpperCase(),
+              style: const TextStyle(
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.mute,
+                  letterSpacing: 0.3)),
           const SizedBox(height: 8),
           TextFormField(
             controller: controller,
             obscureText: obscure,
             keyboardType: keyboardType,
-            validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+            validator: (v) =>
+                (v == null || v.trim().isEmpty) ? 'Required' : null,
             decoration: InputDecoration(hintText: hint),
           ),
         ],
@@ -163,7 +270,10 @@ class _UploadBox extends StatelessWidget {
         children: [
           Icon(icon, size: 20, color: AppColors.terra),
           const SizedBox(height: 8),
-          Text(label, textAlign: TextAlign.center, style: const TextStyle(fontSize: 11.5, color: AppColors.mute, height: 1.4)),
+          Text(label,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                  fontSize: 11.5, color: AppColors.mute, height: 1.4)),
         ],
       ),
     );
