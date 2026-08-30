@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/breadcrumb.dart';
 import '../home/home_screen.dart';
+import 'login_screen.dart';
 import 'role_choice_screen.dart';
 
 /// Step 2 of sign-up. A Purchase account asks for phone, email, and
@@ -65,14 +66,18 @@ class _SignUpFormScreenState extends State<SignUpFormScreen> {
               ),
               const SizedBox(height: 14),
               Center(
-                child: RichText(
-                  text: const TextSpan(
-                    text: 'Already have an account? ',
-                    style: TextStyle(fontSize: 12, color: AppColors.mute),
-                    children: [
-                      TextSpan(text: 'Log In', style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.tealDark)),
-                    ],
-                  ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('Already have an account? ', style: TextStyle(fontSize: 12, color: AppColors.mute)),
+                    GestureDetector(
+                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen())),
+                      child: const Text(
+                        'Log In',
+                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.tealDark),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],

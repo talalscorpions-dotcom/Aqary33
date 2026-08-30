@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
-import '../home/home_screen.dart';
+import 'login_screen.dart';
 import 'role_choice_screen.dart';
 
 class WelcomeScreen extends StatelessWidget {
@@ -48,7 +48,7 @@ class WelcomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               OutlinedButton(
-                onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HomeScreen())),
+                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen())),
                 child: const Text('Log In'),
               ),
               const SizedBox(height: 22),
