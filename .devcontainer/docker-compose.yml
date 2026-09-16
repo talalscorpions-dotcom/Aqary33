@@ -1,0 +1,24 @@
+version: "3.8"
+
+services:
+  app:
+    image: mcr.microsoft.com/devcontainers/javascript-node:20
+    volumes:
+      - ..:/workspaces/aqary-:cached
+    command: sleep infinity
+    environment:
+      DATABASE_URL: postgresql://aqary:aqary@db:5432/aqary
+      DATABASE_SSL: "false"
+
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: aqary
+      POSTGRES_PASSWORD: aqary
+      POSTGRES_DB: aqary
+    volumes:
+      - aqary-postgres-data:/var/lib/postgresql/data
+
+volumes:
+  aqary-postgres-data:
