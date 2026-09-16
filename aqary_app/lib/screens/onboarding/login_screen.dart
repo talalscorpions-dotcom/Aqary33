@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import '../../services/api_client.dart';
+import '../../services/auth_service.dart';
 import '../../theme/app_theme.dart';
 import '../home/home_screen.dart';
 import 'forgot_password_screen.dart';
 import 'role_choice_screen.dart';
 
-/// Email + password sign-in. Previously "Log In" on [WelcomeScreen] skipped
-/// straight to [HomeScreen] with no form at all — this is the real screen,
-/// with a path into [ForgotPasswordScreen] for account recovery.
+/// Email + password sign-in against `POST /auth/log-in` in aqary_backend.
+/// Previously "Log In" on [WelcomeScreen] skipped straight to [HomeScreen]
+/// with no form at all — this is the real screen, with a path into
+/// [ForgotPasswordScreen] for account recovery.
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -120,20 +123,37 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _submit() async {
-    // POST /auth/login in the real backend. Simulated here with a short
-    // delay so the loading state on the button has something to show.
     if (!(_formKey.currentState?.validate() ?? false)) return;
     setState(() => _submitting = true);
-    await Future.delayed(const Duration(milliseconds: 500));
-    if (!mounted) return;
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (_) => const HomeScreen()),
-      (route) => false,
-    );
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Welcome back.'), backgroundColor: AppColors.tealDark),
-    );
+    try {
+      await AuthService.instance.logIn(
+        email: _email.text.trim(),
+        password: _password.text,
+      );
+      if (!mounted) return;
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        (route) => false,
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Welcome back.'), backgroundColor: AppColors.tealDark),
+      );
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(e.message), backgroundColor: AppColors.danger));
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not reach the server. Check your connection.'),
+          backgroundColor: AppColors.danger,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
   }
 }
 

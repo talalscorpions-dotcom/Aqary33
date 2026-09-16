@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../data/mock_data.dart';
 import '../../models/property.dart';
+import '../../services/api_client.dart';
+import '../../services/properties_service.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/breadcrumb.dart';
 import '../../widgets/filter_row.dart';
@@ -10,12 +11,11 @@ import 'schedule_viewing_screen.dart';
 
 /// The one reusable results screen behind every leaf of the taxonomy —
 /// Villas for Sale, Apartments, Offices for Rent, Industrial Land, and
-/// so on. It is parameterised by category/listingType/propertyType and
-/// calls [MockData.filterListings], which stands in for
+/// so on. Parameterised by category/listingType/propertyType and backed
+/// by [PropertiesService.fetchListings], i.e.
 /// `GET /properties?category=...&listing_type=...&property_type=...`
-/// from the architecture doc. Swapping the mock call for a real HTTP
-/// call is the only change needed to go live — no screen gets rebuilt
-/// per property type.
+/// against the real aqary_backend — no screen gets rebuilt per property
+/// type.
 class PropertyResultsScreen extends StatefulWidget {
   final String title;
   final List<String> breadcrumbPath;
@@ -53,15 +53,24 @@ class PropertyResultsScreen extends StatefulWidget {
 
 class _PropertyResultsScreenState extends State<PropertyResultsScreen> {
   ResultsView _view = ResultsView.list;
+  late Future<List<Property>> _future;
 
   @override
-  Widget build(BuildContext context) {
-    final results = MockData.filterListings(
+  void initState() {
+    super.initState();
+    _future = _load();
+  }
+
+  Future<List<Property>> _load() {
+    return PropertiesService.instance.fetchListings(
       category: widget.category,
       listingType: widget.listingType,
       propertyType: widget.propertyType,
     );
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(widget.title)),
       body: SafeArea(
@@ -80,9 +89,26 @@ class _PropertyResultsScreenState extends State<PropertyResultsScreen> {
               FilterRow(filters: widget.filterLabels),
               const SizedBox(height: 14),
               Expanded(
-                child: _view == ResultsView.list
-                    ? _ListView(results: results, allowScheduling: widget.allowScheduling)
-                    : _MapPlaceholder(results: results),
+                child: FutureBuilder<List<Property>>(
+                  future: _future,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState != ConnectionState.done) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (snapshot.hasError) {
+                      return _ErrorState(
+                        message: snapshot.error is ApiException
+                            ? (snapshot.error as ApiException).message
+                            : 'Could not reach the server. Check your connection.',
+                        onRetry: () => setState(() => _future = _load()),
+                      );
+                    }
+                    final results = snapshot.data ?? const <Property>[];
+                    return _view == ResultsView.list
+                        ? _ListView(results: results, allowScheduling: widget.allowScheduling)
+                        : _MapPlaceholder(results: results);
+                  },
+                ),
               ),
             ],
           ),
@@ -212,6 +238,35 @@ class _EmptyState extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColors.mute, fontSize: 13),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ErrorState extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+  const _ErrorState({required this.message, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.cloud_off_rounded, size: 40, color: AppColors.danger),
+            const SizedBox(height: 12),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: AppColors.mute, fontSize: 13),
+            ),
+            const SizedBox(height: 14),
+            OutlinedButton(onPressed: onRetry, child: const Text('Retry')),
           ],
         ),
       ),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../services/api_client.dart';
+import '../../services/auth_service.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/breadcrumb.dart';
 import '../home/home_screen.dart';
@@ -150,6 +152,7 @@ class _SignUpFormScreenState extends State<SignUpFormScreen> {
   MarketplaceCategory? _marketplaceCategory;
   MaintenanceCategory? _maintenanceCategory;
   DevelopmentCategory? _developmentCategory;
+  bool _submitting = false;
 
   bool get _isSeller => widget.role == AccountRole.sell;
 
@@ -284,10 +287,16 @@ class _SignUpFormScreenState extends State<SignUpFormScreen> {
               ],
               const SizedBox(height: 22),
               ElevatedButton(
-                onPressed: _submit,
-                child: Text(_isSeller
-                    ? 'Submit for Verification  →'
-                    : 'Create Account  →'),
+                onPressed: _submitting ? null : _submit,
+                child: _submitting
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2.4, color: Colors.white),
+                      )
+                    : Text(_isSeller
+                        ? 'Submit for Verification  →'
+                        : 'Create Account  →'),
               ),
               const SizedBox(height: 14),
               Center(
@@ -346,24 +355,86 @@ class _SignUpFormScreenState extends State<SignUpFormScreen> {
     ];
   }
 
-  void _submit() {
-    // POST /auth/sign-up in the real backend. Purchase accounts activate
-    // immediately; Sell accounts enter the pending-verification queue
-    // shown in the admin panel (see PendingApprovalsScreen).
+  /// Maps this screen's role picker onto aqary_backend's role model
+  /// (buyer | seller | professional). The backend has no separate concept
+  /// of a real-estate agent vs. a marketplace/retail vendor — both are
+  /// just "seller" — so that distinction only exists on this screen today.
+  ({String role, String? professionalCategory, String? professionalType}) _backendRole() {
+    if (!_isSeller) {
+      return (role: 'buyer', professionalCategory: null, professionalType: null);
+    }
+    switch (_sellerCategory!) {
+      case SellerCategory.realEstateAgent:
+      case SellerCategory.marketplaceRetail:
+        return (role: 'seller', professionalCategory: null, professionalType: null);
+      case SellerCategory.maintenance:
+        return (
+          role: 'professional',
+          professionalCategory: 'maintenance_service',
+          professionalType: _maintenanceCategory!.label,
+        );
+      case SellerCategory.development:
+        return (
+          role: 'professional',
+          professionalCategory: 'development_building',
+          professionalType: _developmentCategory!.label,
+        );
+    }
+  }
+
+  void _submit() async {
+    // Purchase accounts activate immediately; Sell accounts enter the
+    // pending-verification queue shown in the admin panel (see
+    // PendingApprovalsScreen). Licence/ID upload isn't wired up yet — the
+    // boxes above are still visual placeholders — so sellers submit
+    // without documents attached and pick them up on review.
     if (!(_formKey.currentState?.validate() ?? false)) return;
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (_) => const HomeScreen()),
-      (route) => false,
-    );
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(_isSeller
-            ? 'Submitted for verification — you can browse while we review.'
-            : 'Account created — welcome to AQARY.'),
-        backgroundColor: AppColors.tealDark,
-      ),
-    );
+    if (_password.text != _confirm.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Passwords do not match.'), backgroundColor: AppColors.danger),
+      );
+      return;
+    }
+    setState(() => _submitting = true);
+    final mapped = _backendRole();
+    try {
+      await AuthService.instance.signUp(
+        email: _email.text.trim(),
+        phone: _phone.text.trim(),
+        password: _password.text,
+        role: mapped.role,
+        professionalCategory: mapped.professionalCategory,
+        professionalType: mapped.professionalType,
+      );
+      if (!mounted) return;
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        (route) => false,
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(_isSeller
+              ? 'Submitted for verification — you can browse while we review.'
+              : 'Account created — welcome to AQARY.'),
+          backgroundColor: AppColors.tealDark,
+        ),
+      );
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(e.message), backgroundColor: AppColors.danger));
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not reach the server. Check your connection.'),
+          backgroundColor: AppColors.danger,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
   }
 }
 
