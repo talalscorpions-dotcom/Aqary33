@@ -136,7 +136,14 @@ extension DevelopmentCategoryX on DevelopmentCategory {
 /// immediately, matching Section 3.1 of the Statement of Work.
 class SignUpFormScreen extends StatefulWidget {
   final AccountRole role;
-  const SignUpFormScreen({super.key, required this.role});
+
+  /// The seller category, already decided by which icon was tapped on
+  /// [RoleChoiceScreen] — required whenever [role] is
+  /// [AccountRole.sell], since every seller-shaped role tile maps to
+  /// exactly one category.
+  final SellerCategory? initialSellerCategory;
+
+  const SignUpFormScreen({super.key, required this.role, this.initialSellerCategory});
 
   @override
   State<SignUpFormScreen> createState() => _SignUpFormScreenState();
@@ -155,6 +162,12 @@ class _SignUpFormScreenState extends State<SignUpFormScreen> {
   bool _submitting = false;
 
   bool get _isSeller => widget.role == AccountRole.sell;
+
+  @override
+  void initState() {
+    super.initState();
+    _sellerCategory = widget.initialSellerCategory;
+  }
 
   @override
   void dispose() {
@@ -183,28 +196,6 @@ class _SignUpFormScreenState extends State<SignUpFormScreen> {
               ]),
               const SizedBox(height: 4),
               if (_isSeller) ...[
-                Text('SELLER CATEGORY', style: AppTextStyles.kicker),
-                const SizedBox(height: 10),
-                DropdownButtonFormField<SellerCategory>(
-                  value: _sellerCategory,
-                  onChanged: (v) => setState(() {
-                    _sellerCategory = v;
-                    // A sub-category from a previous pick no longer applies
-                    // once the seller category changes.
-                    _marketplaceCategory = null;
-                    _maintenanceCategory = null;
-                    _developmentCategory = null;
-                  }),
-                  validator: (v) => v == null
-                      ? 'Select what kind of seller account this is'
-                      : null,
-                  decoration: const InputDecoration(
-                      hintText: 'What are you selling on AQARY?'),
-                  items: SellerCategory.values
-                      .map((c) =>
-                          DropdownMenuItem(value: c, child: Text(c.label)))
-                      .toList(),
-                ),
                 if (_sellerCategory == SellerCategory.marketplaceRetail)
                   ..._subCategoryDropdown<MarketplaceCategory>(
                     label: 'MARKETPLACE CATEGORY',
@@ -259,13 +250,7 @@ class _SignUpFormScreenState extends State<SignUpFormScreen> {
                 Text('VERIFICATION — REQUIRED FOR SELLERS',
                     style: AppTextStyles.kicker),
                 const SizedBox(height: 10),
-                if (_sellerCategory == null)
-                  const Text(
-                    'Pick a category above to see the documents you need to upload.',
-                    style: TextStyle(
-                        fontSize: 11.5, color: AppColors.mute, height: 1.4),
-                  )
-                else if (_sellerCategory!.requiresAgentDocs) ...[
+                if (_sellerCategory!.requiresAgentDocs) ...[
                   const _UploadBox(
                       icon: Icons.badge_rounded,
                       label:
