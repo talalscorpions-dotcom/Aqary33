@@ -36,7 +36,8 @@ jobs:
       - name: Build Web
         run: |
           cd aqary_app
-          flutter build web --release --base-href=/${{ github.event.repository.name }}/
+          flutter build web --release --base-href=/${{ github.event.repository.name }}/ \
+            --dart-define=API_BASE_URL=https://aqary-backend-l03v.onrender.com
 
       - name: Upload Web Build Artifacts
         uses: actions/upload-artifact@v4
