@@ -1,11 +1,11 @@
 {
-    "name": "aqary_app",
-    "short_name": "aqary_app",
+    "name": "AQARY — Verified Real Estate for Oman",
+    "short_name": "AQARY",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#F5F2EC",
+    "theme_color": "#0F4C4A",
+    "description": "AQARY — verified real estate super app for Oman. Browse properties, connect with professionals, and manage listings.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
