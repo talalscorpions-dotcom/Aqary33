@@ -146,6 +146,58 @@ async function adminLogIn(req, res) {
 }
 
 /**
+ * POST /auth/admin/mfa/enroll
+ * First-time MFA setup for an admin account bootstrapped by
+ * scripts/create-admin.js (which creates the row with mfa_enabled=false,
+ * mfa_secret=NULL). Gated on the account's own password rather than an
+ * admin JWT, since a not-yet-enrolled admin can never obtain one — see
+ * adminLogIn's mfa_enabled check. Re-enrolling an already-active account
+ * is refused so a leaked password alone can't silently take over MFA.
+ */
+async function adminMfaEnroll(req, res) {
+  const { email, password } = req.body;
+  const result = await query("SELECT * FROM users WHERE email = $1 AND role = 'admin'", [email]);
+  const user = result.rows[0];
+
+  if (!user || !(await bcrypt.compare(password, user.password_hash))) {
+    return res.status(401).json({ error: "Invalid email or password." });
+  }
+  if (user.mfa_enabled) {
+    return res.status(409).json({ error: "MFA is already enabled for this account." });
+  }
+
+  const secret = authenticator.generateSecret();
+  await query("UPDATE users SET mfa_secret = $1 WHERE id = $2", [secret, user.id]);
+
+  const otpauthUrl = authenticator.keyuri(email, "AQARY Admin", secret);
+  return res.json({ secret, otpauthUrl });
+}
+
+/**
+ * POST /auth/admin/mfa/confirm
+ * Proves the admin actually captured the secret from /enroll into an
+ * authenticator app before mfa_enabled flips on and admin login unlocks.
+ */
+async function adminMfaConfirm(req, res) {
+  const { email, mfaCode } = req.body;
+  const result = await query("SELECT * FROM users WHERE email = $1 AND role = 'admin'", [email]);
+  const user = result.rows[0];
+
+  if (!user || !user.mfa_secret) {
+    return res.status(400).json({ error: "Call /auth/admin/mfa/enroll first." });
+  }
+  if (user.mfa_enabled) {
+    return res.status(409).json({ error: "MFA is already enabled for this account." });
+  }
+  if (!authenticator.check(mfaCode || "", user.mfa_secret)) {
+    return res.status(401).json({ error: "Invalid MFA code." });
+  }
+
+  await query("UPDATE users SET mfa_enabled = true WHERE id = $1", [user.id]);
+  return res.json({ message: "MFA enabled. You can now log in." });
+}
+
+/**
  * POST /auth/forgot-password
  * BR-AUTH-12 — identical response whether or not the account exists,
  * so the endpoint can't be used to discover registered emails/phones.
@@ -204,4 +256,4 @@ async function resetPassword(req, res) {
   return res.json({ message: "Password updated. You can now log in." });
 }
 
-module.exports = { signUp, logIn, adminLogIn, forgotPassword, resetPassword };
+module.exports = { signUp, logIn, adminLogIn, adminMfaEnroll, adminMfaConfirm, forgotPassword, resetPassword };

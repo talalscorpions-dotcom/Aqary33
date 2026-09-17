@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "migrate": "node src/migrations/run.js"
+    "migrate": "node src/migrations/run.js",
+    "create-admin": "node scripts/create-admin.js"
   },
   "dependencies": {
     "express": "^4.19.2",

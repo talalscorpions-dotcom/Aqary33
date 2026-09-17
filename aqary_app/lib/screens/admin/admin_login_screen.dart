@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../services/api_client.dart';
+import '../../services/auth_service.dart';
 import '../../theme/app_theme.dart';
+import 'admin_mfa_enroll_screen.dart';
 import 'admin_shell.dart';
 
 /// Gate in front of the whole admin panel (Dashboard, Approvals, Leads).
@@ -19,12 +22,14 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _email = TextEditingController();
   final _password = TextEditingController();
+  final _mfaCode = TextEditingController();
   bool _submitting = false;
 
   @override
   void dispose() {
     _email.dispose();
     _password.dispose();
+    _mfaCode.dispose();
     super.dispose();
   }
 
@@ -83,6 +88,13 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                 obscure: true,
                 validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
               ),
+              _Field(
+                label: 'Authenticator Code',
+                hint: '6-digit code',
+                controller: _mfaCode,
+                keyboardType: TextInputType.number,
+                validator: (v) => (v == null || v.trim().length != 6) ? 'Enter the 6-digit code' : null,
+              ),
               const SizedBox(height: 10),
               ElevatedButton(
                 onPressed: _submitting ? null : _submit,
@@ -105,6 +117,19 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                   style: TextStyle(fontSize: 11, color: AppColors.mute),
                 ),
               ),
+              const SizedBox(height: 10),
+              Center(
+                child: TextButton(
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const AdminMfaEnrollScreen()),
+                  ),
+                  child: const Text(
+                    'First time signing in? Set up MFA',
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.tealDark),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -113,15 +138,34 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
   }
 
   void _submit() async {
-    // POST /admin/auth/login in the real backend.
     if (!(_formKey.currentState?.validate() ?? false)) return;
     setState(() => _submitting = true);
-    await Future.delayed(const Duration(milliseconds: 500));
-    if (!mounted) return;
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const AdminShell()),
-    );
+    try {
+      await AuthService.instance.adminLogIn(
+        email: _email.text.trim(),
+        password: _password.text,
+        mfaCode: _mfaCode.text.trim(),
+      );
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const AdminShell()),
+      );
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      setState(() => _submitting = false);
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(e.message), backgroundColor: AppColors.danger));
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _submitting = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not reach the server. Check your connection.'),
+          backgroundColor: AppColors.danger,
+        ),
+      );
+    }
   }
 }
 

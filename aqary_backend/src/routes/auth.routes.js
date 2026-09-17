@@ -11,6 +11,8 @@ const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20 });
 router.post("/sign-up", authLimiter, asyncHandler(auth.signUp));
 router.post("/log-in", authLimiter, asyncHandler(auth.logIn));
 router.post("/admin/log-in", authLimiter, asyncHandler(auth.adminLogIn));
+router.post("/admin/mfa/enroll", authLimiter, asyncHandler(auth.adminMfaEnroll));
+router.post("/admin/mfa/confirm", authLimiter, asyncHandler(auth.adminMfaConfirm));
 router.post("/forgot-password", authLimiter, asyncHandler(auth.forgotPassword));
 router.post("/reset-password", authLimiter, asyncHandler(auth.resetPassword));
 

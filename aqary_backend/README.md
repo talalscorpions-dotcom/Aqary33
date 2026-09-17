@@ -23,10 +23,6 @@ middleware-based enforcement, and the admin verification queue.
 - **Email/SMS delivery for password reset** — `auth.controller.js`
   currently only `console.log`s the reset link. Wire up a real provider
   (SES, Twilio, etc.) — search for the `TODO` comment.
-- **Admin MFA enrollment** — the login endpoint verifies a TOTP code
-  against `users.mfa_secret`, but nothing yet generates/displays a QR
-  code for an admin to enroll. You'll need a small enrollment endpoint
-  using `otplib`'s `authenticator.generateSecret()`.
 - **This was never run against a live database.** The sandbox this was
   built in has no internet access, so `npm install` couldn't fetch
   packages and there was no PostgreSQL instance to test against. Every
@@ -94,12 +90,28 @@ table — same role, same permissions, different data source. See
 
 `POST /admin/users/:id/promote` is mounted behind the same
 `requireRole(["admin"])` as every other admin route — meaning only an
-existing admin's token can ever call it. There's no bootstrap endpoint
-to create the *first* admin; do that with a one-off SQL statement:
+existing admin's token can ever call it. Bootstrap the *first* admin with:
 
-```sql
-UPDATE users SET role = 'admin', mfa_enabled = true, mfa_secret = '<base32-secret>'
-WHERE email = 'your-founder-email@example.com';
+```bash
+npm run create-admin -- --email=you@example.com --phone=+96891234567
+```
+
+It prompts for a password (never taken as a CLI arg, so it can't end up
+in shell history) and creates the row with `mfa_enabled = false`. Finish
+setup by enrolling MFA — there is deliberately no way to skip this, since
+`adminLogIn` refuses to issue a token until it's done:
+
+```bash
+curl -X POST http://localhost:3000/auth/admin/mfa/enroll \
+  -H "Content-Type: application/json" \
+  -d '{"email":"you@example.com","password":"<the password you just set>"}'
+# -> { "secret": "...", "otpauthUrl": "otpauth://totp/..." }
+# Add the secret to an authenticator app (or convert otpauthUrl to a QR
+# code), then confirm with the 6-digit code it produces:
+
+curl -X POST http://localhost:3000/auth/admin/mfa/confirm \
+  -H "Content-Type: application/json" \
+  -d '{"email":"you@example.com","mfaCode":"123456"}'
 ```
 
 ## Testing the Loan Calculator Independently

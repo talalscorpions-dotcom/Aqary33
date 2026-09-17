@@ -78,6 +78,58 @@ class AuthService {
     return user;
   }
 
+  Future<AppUser> adminLogIn({
+    required String email,
+    required String password,
+    required String mfaCode,
+  }) async {
+    final body = await ApiClient.instance.post('/auth/admin/log-in', {
+      'email': email,
+      'password': password,
+      'mfaCode': mfaCode,
+    });
+    return _saveSession(token: body['token'] as String, userJson: body['user'] as Map<String, dynamic>);
+  }
+
+  /// Step 1 of first-time admin MFA setup. Returns the raw secret and an
+  /// otpauth:// URL — this app has no QR renderer, so both are shown as
+  /// selectable text for manual entry into an authenticator app.
+  Future<({String secret, String otpauthUrl})> adminMfaEnroll({
+    required String email,
+    required String password,
+  }) async {
+    final body = await ApiClient.instance.post('/auth/admin/mfa/enroll', {
+      'email': email,
+      'password': password,
+    });
+    return (secret: body['secret'] as String, otpauthUrl: body['otpauthUrl'] as String);
+  }
+
+  /// Step 2 — proves the secret was captured before MFA (and therefore
+  /// admin login) turns on.
+  Future<void> adminMfaConfirm({required String email, required String mfaCode}) async {
+    await ApiClient.instance.post('/auth/admin/mfa/confirm', {
+      'email': email,
+      'mfaCode': mfaCode,
+    });
+  }
+
+  /// Always succeeds from the caller's point of view — the backend
+  /// deliberately returns the same response whether or not the account
+  /// exists, so it can't be used to discover registered emails/phones.
+  Future<void> forgotPassword(String emailOrPhone) async {
+    await ApiClient.instance.post('/auth/forgot-password', {
+      'emailOrPhone': emailOrPhone,
+    });
+  }
+
+  Future<void> resetPassword({required String token, required String newPassword}) async {
+    await ApiClient.instance.post('/auth/reset-password', {
+      'token': token,
+      'newPassword': newPassword,
+    });
+  }
+
   Future<void> logOut() async {
     currentUser = null;
     ApiClient.instance.setToken(null);

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import '../../models/app_user.dart';
+import '../../services/auth_service.dart';
 import '../../theme/app_theme.dart';
 import '../admin/admin_login_screen.dart';
+import '../properties/create_listing_screen.dart';
 import '../properties/properties_flow.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -8,6 +11,7 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final user = AuthService.instance.currentUser;
     return Scaffold(
       body: SafeArea(
         child: ListView(
@@ -48,6 +52,10 @@ class HomeScreen extends StatelessWidget {
             ),
             const Text('Muscat, Al Khuwair',
                 style: TextStyle(fontSize: 12, color: AppColors.mute)),
+            if (user != null && user.role != 'buyer') ...[
+              const SizedBox(height: 14),
+              _RoleBanner(user: user),
+            ],
             const SizedBox(height: 16),
             TextField(
               decoration: InputDecoration(
@@ -168,6 +176,70 @@ class HomeScreen extends StatelessWidget {
       SnackBar(
           content: Text(
               '$module — build this screen next, following the Properties pattern.')),
+    );
+  }
+}
+
+/// Everything below is identical for every signed-in role except this
+/// banner — the rest of HomeScreen (module grid, nav bar) doesn't yet
+/// branch by role at all. A seller/professional account still browses
+/// the same "buyer" home; this is the one place role starts to matter.
+class _RoleBanner extends StatelessWidget {
+  final AppUser user;
+  const _RoleBanner({required this.user});
+
+  @override
+  Widget build(BuildContext context) {
+    final pending = user.verificationStatus == 'pending';
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.tealTint,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.line),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                pending ? Icons.hourglass_top_rounded : Icons.storefront_rounded,
+                size: 16,
+                color: AppColors.tealDark,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                user.role == 'professional' ? 'Professional account' : 'Seller account',
+                style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.tealDark),
+              ),
+            ],
+          ),
+          if (pending) ...[
+            const SizedBox(height: 6),
+            const Text(
+              'Pending verification — you can browse while we review your documents.',
+              style: TextStyle(fontSize: 12, color: AppColors.mute, height: 1.4),
+            ),
+          ],
+          if (user.role == 'seller') ...[
+            const SizedBox(height: 10),
+            OutlinedButton.icon(
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const CreateListingScreen()),
+              ),
+              icon: const Icon(Icons.add_rounded, size: 18),
+              label: const Text('Add Listing'),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size(0, 36),
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }
