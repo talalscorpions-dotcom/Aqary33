@@ -170,15 +170,15 @@ class _RoleTile extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                width: 38,
-                height: 38,
+                width: 28,
+                height: 28,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(11),
+                  borderRadius: BorderRadius.circular(9),
                   gradient: LinearGradient(colors: option.gradient, begin: Alignment.topLeft, end: Alignment.bottomRight),
                 ),
-                child: Icon(option.icon, color: Colors.white, size: 17),
+                child: Icon(option.icon, color: Colors.white, size: 13),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 9),
               Text(option.title, textAlign: TextAlign.center, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.ink)),
               const SizedBox(height: 4),
               Text(option.subtitle, textAlign: TextAlign.center, style: const TextStyle(fontSize: 9.5, color: AppColors.mute, height: 1.25)),
