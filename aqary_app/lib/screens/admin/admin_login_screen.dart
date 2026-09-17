@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../services/api_client.dart';
 import '../../services/auth_service.dart';
 import '../../theme/app_theme.dart';
+import '../onboarding/forgot_password_screen.dart';
 import 'admin_mfa_enroll_screen.dart';
 import 'admin_shell.dart';
 
@@ -87,6 +88,28 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                 controller: _password,
                 obscure: true,
                 validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
+              ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: TextButton(
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => ForgotPasswordScreen(initialEmail: _email.text.trim())),
+                    ),
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      minimumSize: const Size(0, 0),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: const Text(
+                      'Forgot password?',
+                      style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.tealDark),
+                    ),
+                  ),
+                ),
               ),
               _Field(
                 label: 'Authenticator Code',
