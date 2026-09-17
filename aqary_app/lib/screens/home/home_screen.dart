@@ -3,6 +3,7 @@ import '../../models/app_user.dart';
 import '../../services/auth_service.dart';
 import '../../theme/app_theme.dart';
 import '../admin/admin_login_screen.dart';
+import '../onboarding/welcome_screen.dart';
 import '../properties/create_listing_screen.dart';
 import '../properties/properties_flow.dart';
 
@@ -42,12 +43,28 @@ class HomeScreen extends StatelessWidget {
                   child: Text('Good morning, Talal',
                       style: AppTextStyles.heading.copyWith(fontSize: 21)),
                 ),
-                const CircleAvatar(
-                    radius: 18,
-                    backgroundColor: AppColors.terra,
-                    child: Text('T',
-                        style: TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.w800))),
+                PopupMenuButton<String>(
+                  offset: const Offset(0, 44),
+                  onSelected: (value) => _handleMenuSelection(context, value),
+                  itemBuilder: (context) => [
+                    const PopupMenuItem(
+                      value: 'logout',
+                      child: Row(
+                        children: [
+                          Icon(Icons.logout_rounded, size: 18, color: AppColors.danger),
+                          SizedBox(width: 10),
+                          Text('Log Out'),
+                        ],
+                      ),
+                    ),
+                  ],
+                  child: const CircleAvatar(
+                      radius: 18,
+                      backgroundColor: AppColors.terra,
+                      child: Text('T',
+                          style: TextStyle(
+                              color: Colors.white, fontWeight: FontWeight.w800))),
+                ),
               ],
             ),
             const Text('Muscat, Al Khuwair',
@@ -176,6 +193,16 @@ class HomeScreen extends StatelessWidget {
       SnackBar(
           content: Text(
               '$module — build this screen next, following the Properties pattern.')),
+    );
+  }
+
+  static void _handleMenuSelection(BuildContext context, String value) async {
+    if (value != 'logout') return;
+    await AuthService.instance.logOut();
+    if (!context.mounted) return;
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+      (route) => false,
     );
   }
 }
