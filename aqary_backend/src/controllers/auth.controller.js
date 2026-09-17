@@ -113,6 +113,10 @@ async function logIn(req, res) {
   }
 
   const token = signUserToken(user);
+  await query(
+    "INSERT INTO app_sessions (user_id, role, device) VALUES ($1,$2,$3)",
+    [user.id, user.role, req.body.device || null]
+  );
   return res.json({
     token,
     user: { id: user.id, email: user.email, role: user.role, verificationStatus: user.verification_status },
@@ -142,6 +146,10 @@ async function adminLogIn(req, res) {
   }
 
   const token = signAdminToken(user);
+  await query(
+    "INSERT INTO app_sessions (user_id, role, device) VALUES ($1,'admin',$2)",
+    [user.id, req.body.device || null]
+  );
   return res.json({ token, user: { id: user.id, email: user.email, role: "admin" } });
 }
 

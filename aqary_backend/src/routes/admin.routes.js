@@ -16,5 +16,9 @@ router.post("/users/:id/promote", asyncHandler(admin.promoteUser));
 router.get("/analytics/active-users", asyncHandler(admin.getActiveUsers));
 router.get("/analytics/top-visitors", asyncHandler(admin.getTopVisitors));
 router.get("/analytics/listing-clicks", asyncHandler(admin.getListingClicks));
+router.get("/analytics/overview", asyncHandler(admin.getOverviewStats));
+router.get("/analytics/leads-timeseries", asyncHandler(admin.getLeadsTimeseries));
+router.get("/analytics/engagement", asyncHandler(admin.getEngagementStats));
+router.get("/leads", asyncHandler(admin.getLeads));
 
 module.exports = router;

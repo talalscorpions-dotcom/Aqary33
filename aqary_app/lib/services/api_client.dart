@@ -51,6 +51,14 @@ class ApiClient {
     return _decode(res);
   }
 
+  /// Like [get], but for endpoints whose body is a bare JSON array (every
+  /// `admin.controller.js` list/analytics endpoint returns `result.rows`
+  /// directly rather than wrapping it in `{results: [...]}`).
+  Future<List<dynamic>> getList(String path, {Map<String, dynamic>? query}) async {
+    final res = await http.get(_uri(path, query), headers: _headers);
+    return _decodeList(res);
+  }
+
   Future<Map<String, dynamic>> post(String path, [Map<String, dynamic>? body]) async {
     final res = await http.post(
       _uri(path),
@@ -81,5 +89,16 @@ class ApiClient {
       throw ApiException(res.statusCode, message);
     }
     return body;
+  }
+
+  List<dynamic> _decodeList(http.Response res) {
+    final dynamic decoded = res.body.isNotEmpty ? jsonDecode(res.body) : const [];
+    if (res.statusCode < 200 || res.statusCode >= 300) {
+      final message = (decoded is Map && decoded['error'] != null)
+          ? decoded['error'].toString()
+          : 'Request failed (HTTP ${res.statusCode}).';
+      throw ApiException(res.statusCode, message);
+    }
+    return decoded is List ? decoded : const [];
   }
 }
