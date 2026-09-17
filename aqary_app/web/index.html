@@ -18,21 +18,71 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="AQARY — verified real estate super app for Oman. Browse properties, connect with development and maintenance professionals, and manage listings.">
+  <meta name="theme-color" content="#0F4C4A">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="aqary_app">
+  <meta name="apple-mobile-web-app-title" content="AQARY">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>aqary_app</title>
+  <title>AQARY — Verified Real Estate for Oman</title>
   <link rel="manifest" href="manifest.json">
+
+  <style>
+    #app-loading {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      background: #F5F2EC;
+      z-index: 9999;
+      transition: opacity 0.25s ease;
+    }
+    #app-loading .mark {
+      width: 72px;
+      height: 72px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #17706C, #0A3634);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 26px rgba(10, 54, 52, 0.28);
+    }
+    #app-loading .spinner {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 3px solid #E4E1DA;
+      border-top-color: #17706C;
+      animation: app-loading-spin 0.8s linear infinite;
+    }
+    @keyframes app-loading-spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
 </head>
 <body>
+  <!-- Shown while Flutter/CanvasKit initializes — removed on the engine's
+       'flutter-first-frame' event so visitors see brand + progress instead
+       of a blank page during the first couple of seconds. -->
+  <div id="app-loading" aria-hidden="true">
+    <div class="mark">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 3.2 21 11h-3v9h-5v-6h-2v6H6v-9H3l9-7.8Z"/>
+      </svg>
+    </div>
+    <div class="spinner"></div>
+  </div>
+
   <!--
     You can customize the "flutter_bootstrap.js" script.
     This is useful to provide a custom configuration to the Flutter loader
@@ -42,5 +92,13 @@
     * https://docs.flutter.dev/platform-integration/web/initialization
   -->
   <script src="flutter_bootstrap.js" async></script>
+  <script>
+    window.addEventListener('flutter-first-frame', function () {
+      var loading = document.getElementById('app-loading');
+      if (!loading) return;
+      loading.style.opacity = '0';
+      setTimeout(function () { loading.remove(); }, 250);
+    });
+  </script>
 </body>
 </html>
