@@ -27,6 +27,7 @@ class _AdminMfaEnrollScreenState extends State<AdminMfaEnrollScreen> {
   String? _secret;
   String? _otpauthUrl;
   bool _confirmed = false;
+  bool _obscurePassword = true;
 
   @override
   void dispose() {
@@ -67,7 +68,20 @@ class _AdminMfaEnrollScreenState extends State<AdminMfaEnrollScreen> {
           ),
           const SizedBox(height: 24),
           _field('ADMIN EMAIL', 'admin@aqary.om', _emailController, keyboardType: TextInputType.emailAddress),
-          _field('PASSWORD', '••••••••', _passwordController, obscure: true),
+          _field(
+            'PASSWORD',
+            '••••••••',
+            _passwordController,
+            obscure: _obscurePassword,
+            suffixIcon: IconButton(
+              icon: Icon(
+                _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                size: 19,
+                color: AppColors.mute,
+              ),
+              onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+            ),
+          ),
           const SizedBox(height: 10),
           ElevatedButton(
             onPressed: _submitting ? null : _submitStep1,
@@ -120,7 +134,8 @@ class _AdminMfaEnrollScreenState extends State<AdminMfaEnrollScreen> {
     );
   }
 
-  Widget _field(String label, String hint, TextEditingController controller, {bool obscure = false, TextInputType? keyboardType}) {
+  Widget _field(String label, String hint, TextEditingController controller,
+      {bool obscure = false, TextInputType? keyboardType, Widget? suffixIcon}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Column(
@@ -133,7 +148,7 @@ class _AdminMfaEnrollScreenState extends State<AdminMfaEnrollScreen> {
             obscureText: obscure,
             keyboardType: keyboardType,
             validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
-            decoration: InputDecoration(hintText: hint),
+            decoration: InputDecoration(hintText: hint, suffixIcon: suffixIcon),
           ),
         ],
       ),

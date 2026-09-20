@@ -199,7 +199,7 @@ String? _validateEmail(String? v) {
   return ok ? null : 'Enter a valid email address';
 }
 
-class _Field extends StatelessWidget {
+class _Field extends StatefulWidget {
   final String label;
   final String hint;
   final TextEditingController controller;
@@ -217,13 +217,20 @@ class _Field extends StatelessWidget {
   });
 
   @override
+  State<_Field> createState() => _FieldState();
+}
+
+class _FieldState extends State<_Field> {
+  late bool _obscured = widget.obscure;
+
+  @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label.toUpperCase(),
+          Text(widget.label.toUpperCase(),
               style: const TextStyle(
                   fontSize: 10.5,
                   fontWeight: FontWeight.w800,
@@ -231,12 +238,24 @@ class _Field extends StatelessWidget {
                   letterSpacing: 0.3)),
           const SizedBox(height: 8),
           TextFormField(
-            controller: controller,
-            obscureText: obscure,
-            keyboardType: keyboardType,
-            validator: validator ??
+            controller: widget.controller,
+            obscureText: _obscured,
+            keyboardType: widget.keyboardType,
+            validator: widget.validator ??
                 (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
-            decoration: InputDecoration(hintText: hint),
+            decoration: InputDecoration(
+              hintText: widget.hint,
+              suffixIcon: widget.obscure
+                  ? IconButton(
+                      icon: Icon(
+                        _obscured ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                        size: 19,
+                        color: AppColors.mute,
+                      ),
+                      onPressed: () => setState(() => _obscured = !_obscured),
+                    )
+                  : null,
+            ),
           ),
         ],
       ),
